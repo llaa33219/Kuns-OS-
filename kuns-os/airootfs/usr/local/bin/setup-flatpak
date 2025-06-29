@@ -1,0 +1,15 @@
+#!/bin/bash
+# Kuns OS Flatpak Setup Script
+
+echo "Setting up Flatpak repository..."
+
+# Add Flathub repository
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# Update Flatpak
+flatpak update --noninteractive
+
+echo "Flatpak setup completed!"
+echo "You can now install Flatpak applications using:"
+echo "  flatpak install flathub <application-name>"
+echo "Or use a GUI application store that supports Flatpak." 

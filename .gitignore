@@ -1,0 +1,35 @@
+# Build artifacts and work directories
+kuns-os/work/
+*.iso
+*.tar.xz
+*.tar.gz
+*.sha512
+*.sfs
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Package caches
+*.pkg.tar.*
+*.pkg.tar
+
+# Log files
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Node modules (if any web components)
+node_modules/
+
+# Build timestamps
+*.uuid 

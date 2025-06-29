@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Welcome to Kuns OS
+Name[ko]=Kuns OS에 오신 것을 환영합니다
+Comment=Learn about Kuns OS and get started
+Comment[ko]=Kuns OS에 대해 알아보고 시작하세요
+GenericName=Welcome Screen
+GenericName[ko]=환영 화면
+Exec=terminology -e "echo 'Welcome to Kuns OS!'; echo ''; echo 'Based on Arch Linux with Enlightenment Desktop'; echo 'Includes GNOME and KDE applications'; echo 'Flatpak support for additional software'; echo ''; echo 'To install Kuns OS permanently, use the Install icon'; echo 'To set up Flatpak, run: setup-flatpak'; echo ''; echo 'Press any key to continue...'; read"
+Icon=system-help
+Terminal=false
+StartupNotify=true
+NoDisplay=false
+Categories=System; 

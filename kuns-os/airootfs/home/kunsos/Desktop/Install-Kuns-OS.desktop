@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Kuns OS
+Name[ko]=Kuns OS 설치
+Comment=Install Kuns OS to your computer with GUI tools
+Comment[ko]=GUI 도구로 컴퓨터에 Kuns OS를 설치합니다
+GenericName=System Installer
+GenericName[ko]=시스템 설치 프로그램
+Keywords=installer;system;install;gui;
+Exec=terminology -e "sudo kuns-installer"
+Icon=system-installer
+Terminal=false
+StartupNotify=true
+NoDisplay=false
+Categories=System; 

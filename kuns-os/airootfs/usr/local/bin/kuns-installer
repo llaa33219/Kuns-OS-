@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Kuns OS Installer - PyQt5 GUI Installer
+
+# Check if Python and PyQt5 are available
+if ! command -v python3 &> /dev/null; then
+    zenity --error --title="Error" --text="Python3가 설치되지 않았습니다!"
+    exit 1
+fi
+
+# Welcome notification
+notify-send "Kuns OS Installer" "GUI 설치 프로그램을 시작합니다..." --icon=system-software-install
+
+# Start the Python GUI installer
+cd /usr/local/bin
+python3 kuns-installer.py 
