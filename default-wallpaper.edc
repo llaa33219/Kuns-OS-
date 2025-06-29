@@ -1,0 +1,21 @@
+images {
+    image: "background-image.png" COMP;
+}
+
+collections {
+    group {
+        name: "e/desktop/background";
+        parts {
+            part {
+                name: "bg";
+                type: IMAGE;
+                description {
+                    state: "default" 0.0;
+                    image.normal: "background-image.png";
+                    aspect: 1.0 1.0;
+                    aspect_preference: NONE;
+                }
+            }
+        }
+    }
+}
