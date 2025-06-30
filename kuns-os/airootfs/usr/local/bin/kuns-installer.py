@@ -65,7 +65,7 @@ class ArchInstallThread(QThread):
             if not self._configure_system():
                 self.finished.emit(False, "System configuration failed")
                 return
-            self.progress.emit(85)
+            self.progress.emit(80)
             
             # Step 7: Install bootloader
             if not self._install_bootloader():
@@ -337,7 +337,123 @@ class ArchInstallThread(QThread):
         if not self._run_command(f"arch-chroot {self.mount_point} systemctl enable lightdm"):
             return False
         
+        # Copy Kuns OS personalization settings
+        self.log_output.emit("Copying Kuns OS personalization settings...")
+        if not self._copy_personalization_settings():
+            self.log_output.emit("Warning: Failed to copy some personalization settings")
+        
         return True
+
+    def _copy_personalization_settings(self):
+        """Install Kuns OS customizations without copying live environment settings"""
+        try:
+            username = self.config.get('username', 'kunsos')
+            user_home = f"{self.mount_point}/home/{username}"
+            
+            # Ensure user home directory exists
+            os.makedirs(user_home, exist_ok=True)
+            
+            # Create fresh .xinitrc for Enlightenment with wallpaper setup
+            self.log_output.emit("Creating fresh .xinitrc...")
+            xinitrc_content = '''#!/bin/bash
+
+# Wait for Enlightenment to fully initialize
+sleep 5
+
+# Set Kuns OS wallpaper
+if [ -f ~/.e/e/backgrounds/kuns-default-wallpaper.png ]; then
+    enlightenment_remote -desktop-bg-set ~/.e/e/backgrounds/kuns-default-wallpaper.png
+elif [ -f /usr/share/backgrounds/background-image.png ]; then
+    enlightenment_remote -desktop-bg-set /usr/share/backgrounds/background-image.png
+fi
+
+# Start Enlightenment
+exec enlightenment_start
+'''
+            with open(f"{user_home}/.xinitrc", "w") as f:
+                f.write(xinitrc_content)
+            os.chmod(f"{user_home}/.xinitrc", 0o755)
+            self.log_output.emit("✓ Fresh .xinitrc created")
+            
+            # Setup wallpaper directories and files
+            self.log_output.emit("Setting up wallpaper system...")
+            
+            # Create user backgrounds directory
+            user_bg_dir = f"{user_home}/.e/e/backgrounds"
+            os.makedirs(user_bg_dir, exist_ok=True)
+            
+            # Copy wallpaper files to system directories
+            system_bg_dirs = [
+                f"{self.mount_point}/usr/share/backgrounds",
+                f"{self.mount_point}/usr/share/enlightenment/data/backgrounds"
+            ]
+            
+            # Find source wallpaper
+            wallpaper_sources = [
+                "/usr/share/backgrounds/background-image.png",
+                "/usr/share/enlightenment/data/backgrounds/default-wallpaper.png"
+            ]
+            
+            source_wallpaper = None
+            for source in wallpaper_sources:
+                if os.path.exists(source):
+                    source_wallpaper = source
+                    break
+            
+            if source_wallpaper:
+                # Copy to user directory
+                target_user_wallpaper = f"{user_bg_dir}/kuns-default-wallpaper.png"
+                shutil.copy2(source_wallpaper, target_user_wallpaper)
+                self.log_output.emit("✓ User wallpaper copied")
+                
+                # Copy to system directories
+                for bg_dir in system_bg_dirs:
+                    os.makedirs(bg_dir, exist_ok=True)
+                    try:
+                        shutil.copy2(source_wallpaper, f"{bg_dir}/background-image.png")
+                        shutil.copy2(source_wallpaper, f"{bg_dir}/default-wallpaper.png")
+                        self.log_output.emit(f"✓ System wallpapers copied to {bg_dir}")
+                    except Exception as e:
+                        self.log_output.emit(f"Warning: Failed to copy to {bg_dir}: {e}")
+            else:
+                self.log_output.emit("Warning: No source wallpaper found")
+            
+            # Copy system customizations (icons, themes, etc.)
+            self.log_output.emit("Copying system customizations...")
+            system_customizations = [
+                ("/usr/share/pixmaps", f"{self.mount_point}/usr/share/pixmaps"),
+                ("/usr/share/icons", f"{self.mount_point}/usr/share/icons"),
+                ("/usr/local/bin", f"{self.mount_point}/usr/local/bin")
+            ]
+            
+            for src_dir, dst_dir in system_customizations:
+                if os.path.exists(src_dir):
+                    try:
+                        # Only copy Kuns OS specific files
+                        for item in os.listdir(src_dir):
+                            if "kuns" in item.lower():
+                                src_path = os.path.join(src_dir, item)
+                                dst_path = os.path.join(dst_dir, item)
+                                os.makedirs(dst_dir, exist_ok=True)
+                                if os.path.isfile(src_path):
+                                    shutil.copy2(src_path, dst_path)
+                                elif os.path.isdir(src_path):
+                                    shutil.copytree(src_path, dst_path, dirs_exist_ok=True)
+                        self.log_output.emit(f"✓ Customizations copied from {src_dir}")
+                    except Exception as e:
+                        self.log_output.emit(f"Warning: Failed to copy customizations from {src_dir}: {e}")
+            
+            # Set proper ownership for user files
+            self.log_output.emit("Setting file ownership...")
+            if not self._run_command(f"arch-chroot {self.mount_point} chown -R {username}:{username} /home/{username}", check=False):
+                self.log_output.emit("Warning: Failed to set ownership")
+            
+            self.log_output.emit("✓ Fresh Kuns OS customizations installed successfully")
+            return True
+            
+        except Exception as e:
+            self.log_output.emit(f"Error installing customizations: {e}")
+            return False
 
     def _install_bootloader(self):
         """Install GRUB bootloader"""
@@ -378,6 +494,52 @@ class ArchInstallThread(QThread):
             self.log_output.emit("WARNING: Both EFI and BIOS installation failed!")
             # Don't return False, continue with config generation
         
+        # Configure GRUB defaults for Kuns OS
+        self.log_output.emit("Configuring GRUB for Kuns OS...")
+        grub_default_content = '''# GRUB defaults for Kuns OS
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="Kuns OS"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX=""
+GRUB_PRELOAD_MODULES="part_gpt part_msdos"
+GRUB_TERMINAL_INPUT=console
+GRUB_TERMINAL_OUTPUT=gfxterm
+GRUB_GFXMODE=auto
+GRUB_GFXPAYLOAD_LINUX=keep
+GRUB_DISABLE_RECOVERY=true
+GRUB_BACKGROUND="/boot/grub/background.png"
+'''
+        with open(f"{self.mount_point}/etc/default/grub", "w") as f:
+            f.write(grub_default_content)
+
+        # Copy GRUB background image
+        self.log_output.emit("Copying GRUB background image...")
+        grub_dir = f"{self.mount_point}/boot/grub"
+        os.makedirs(grub_dir, exist_ok=True)
+        
+        # Copy background from multiple possible sources
+        background_sources = [
+            "/usr/share/backgrounds/GRUB-background.png",
+            "/usr/share/backgrounds/background-image.png",
+            "/usr/share/enlightenment/data/backgrounds/default-wallpaper.png",
+            "/usr/share/backgrounds/default-wallpaper.png"
+        ]
+        
+        background_copied = False
+        for source in background_sources:
+            if os.path.exists(source):
+                try:
+                    shutil.copy2(source, f"{grub_dir}/background.png")
+                    self.log_output.emit(f"✓ GRUB background copied from {source}")
+                    background_copied = True
+                    break
+                except Exception as e:
+                    self.log_output.emit(f"Failed to copy from {source}: {e}")
+        
+        if not background_copied:
+            self.log_output.emit("Warning: Failed to copy GRUB background image")
+
         # Generate GRUB configuration
         self.log_output.emit("Generating GRUB configuration...")
         if not self._run_command(f"arch-chroot {self.mount_point} grub-mkconfig -o /boot/grub/grub.cfg"):

@@ -35,6 +35,6 @@ file_permissions=(
   ["/home/kunsos/Desktop/Install-Kuns-OS.desktop"]="1000:1000:755"
   ["/home/kunsos/Desktop/Welcome.desktop"]="1000:1000:755"
   ["/home/kunsos/.e"]="1000:1000:755"
-  ["/home/kunsos/.wallpaper-setup.sh"]="1000:1000:755"
   ["/usr/share/enlightenment"]="0:0:755"
+  ["/home/kunsos/.e/e/backgrounds/kuns-default-wallpaper.png"]="1000:1000:644"
 )
