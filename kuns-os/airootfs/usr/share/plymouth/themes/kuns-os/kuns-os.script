@@ -1,0 +1,71 @@
+# Kuns OS Plymouth Theme Script
+
+# Set background color to black
+background.r = 0;
+background.g = 0;
+background.b = 0;
+background.a = 1;
+
+# Load logo image
+logo.image = Image("kuns-os-logo.png");
+logo.sprite = Sprite(logo.image);
+
+# Center the logo on screen
+logo.sprite.SetX(Window.GetWidth() / 2 - logo.image.GetWidth() / 2);
+logo.sprite.SetY(Window.GetHeight() / 2 - logo.image.GetHeight() / 2);
+
+# Progress bar settings
+progress_box.image = Image("progress_box.png");
+progress_box.sprite = Sprite(progress_box.image);
+progress_box.x = Window.GetWidth() / 2 - progress_box.image.GetWidth() / 2;
+progress_box.y = Window.GetHeight() * 0.75;
+progress_box.sprite.SetPosition(progress_box.x, progress_box.y, 0);
+
+progress_bar.original_image = Image("progress_bar.png");
+progress_bar.sprite = Sprite();
+progress_bar.x = Window.GetWidth() / 2 - progress_bar.original_image.GetWidth() / 2;
+progress_bar.y = Window.GetHeight() * 0.75;
+progress_bar.sprite.SetPosition(progress_bar.x, progress_bar.y, 1);
+
+fun progress_callback(duration, progress) {
+    if (progress_bar.original_image.GetWidth() > 0) {
+        progress_bar.image = progress_bar.original_image.Scale(
+            progress_bar.original_image.GetWidth() * progress,
+            progress_bar.original_image.GetHeight()
+        );
+        progress_bar.sprite.SetImage(progress_bar.image);
+    }
+}
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+# Text display for status messages
+status = "Starting Kuns OS...";
+
+fun display_normal_callback() {
+    # Keep the logo and progress bar visible
+}
+
+fun display_password_callback(prompt, bullets) {
+    # Display password prompt if needed
+}
+
+fun display_question_callback(prompt, entry) {
+    # Display question prompt if needed
+}
+
+fun display_message_callback(text) {
+    status = text;
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+Plymouth.SetMessageFunction(display_message_callback);
+
+# Quit callback
+fun quit_callback() {
+    logo.sprite.SetOpacity(0);
+}
+
+Plymouth.SetQuitFunction(quit_callback); 

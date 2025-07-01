@@ -26,6 +26,7 @@ file_permissions=(
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
   ["/usr/local/bin/setup-flatpak"]="0:0:755"
+  ["/usr/local/bin/setup-plymouth"]="0:0:755"
   ["/usr/local/bin/kuns-installer"]="0:0:755"
   ["/home/kunsos"]="1000:1000:755"
   ["/home/kunsos/.zshrc"]="1000:1000:644"
@@ -37,4 +38,8 @@ file_permissions=(
   ["/home/kunsos/.e"]="1000:1000:755"
   ["/usr/share/enlightenment"]="0:0:755"
   ["/home/kunsos/.e/e/backgrounds/kuns-default-wallpaper.png"]="1000:1000:644"
+  ["/usr/share/plymouth"]="0:0:755"
+  ["/usr/share/plymouth/themes"]="0:0:755"
+  ["/usr/share/plymouth/themes/kuns-os"]="0:0:755"
+  ["/etc/plymouth"]="0:0:755"
 )

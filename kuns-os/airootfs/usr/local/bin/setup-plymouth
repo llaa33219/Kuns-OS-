@@ -1,0 +1,16 @@
+#!/bin/bash
+# Setup Plymouth theme for Kuns OS
+
+# Ensure Plymouth directories exist
+mkdir -p /usr/share/plymouth/themes/kuns-os
+mkdir -p /etc/plymouth
+
+# Set the default theme
+plymouth-set-default-theme kuns-os
+
+# Update initramfs if running on the installed system
+if [ -f /usr/bin/mkinitcpio ] && [ ! -f /.archiso ]; then
+    mkinitcpio -p linux
+fi
+
+exit 0 

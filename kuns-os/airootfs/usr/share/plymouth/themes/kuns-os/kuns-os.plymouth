@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Kuns OS
+Description=Kuns OS Boot Theme with Logo
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/kuns-os
+ScriptFile=/usr/share/plymouth/themes/kuns-os/kuns-os.script 
